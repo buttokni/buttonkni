@@ -14,6 +14,7 @@
             margin: 0;
             padding: 20px;
             background-color: #0a1929;
+            color: white;
         }
 
         .container {
@@ -45,19 +46,7 @@
             100% { transform: translate(-50%, 0); }
         }
 
-        .error-popup {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translate(-50%, 0);
-            background-color: #ff3333;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            animation: shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
-            display: none;
-        }
+        @keyframes rainbow {
             0% { border-color: #ff0000; }
             17% { border-color: #ff8800; }
             33% { border-color: #ffff00; }
@@ -75,6 +64,20 @@
             67% { background-color: #0099ff; }
             83% { background-color: #6633ff; }
             100% { background-color: #ff0000; }
+        }
+
+        .error-popup {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translate(-50%, 0);
+            background-color: #ff3333;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            animation: shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+            display: none;
         }
 
         .code-input {
@@ -126,7 +129,9 @@
             flex-direction: column;
             gap: 10px;
             align-items: center;
+            color: white;
         }
+
         .hint-line {
             width: 100%;
             text-align: center;
@@ -148,7 +153,7 @@
         <div class="hint-progress" id="hintProgress"></div>
 
         <div class="code-input">
-            <input type="text" id="codeInput" placeholder="..." maxlength="6">
+            <input type="text" id="codeInput" placeholder="..." maxlength="7">
             <button onclick="checkCode()">submit</button>
         </div>
 
@@ -161,16 +166,7 @@
     </div>
 
     <script>
-        const _0x5f2c = {
-            k: '88dff88e38f',
-            s: 'ryansep'
-        };
-        // Obscure the actual code
-        const correctCode = (() => {
-            const shift = 3;
-            const base = _0x5f2c.s;
-            return base; // The deobfuscation happens in the check
-        })();
+        const correctCode = 'ryansep';
 
         const hints = [
             "The first letter is 'r'",
@@ -215,11 +211,6 @@
                 hintLine.textContent = line;
                 hintProgressDiv.appendChild(hintLine);
             }
-            
-            // Update hint text
-            if (daysPassed < hints.length) {
-                document.getElementById('hint').textContent = hints[daysPassed];
-            }
         }
 
         function updateTimer() {
@@ -239,25 +230,32 @@
 
         function checkCode() {
             const input = document.getElementById('codeInput').value.toLowerCase();
+            const errorPopup = document.getElementById('errorPopup');
+            
             if (input === correctCode) {
                 // Do nothing for now, will be implemented later
             } else {
-                const errorPopup = document.getElementById('errorPopup');
+                // If animation is already running, don't start a new one
+                if (errorPopup.style.display === 'block') {
+                    return;
+                }
+                
                 errorPopup.style.display = 'block';
                 errorPopup.style.animation = 'none';
                 errorPopup.offsetHeight; // Trigger reflow
-                errorPopup.style.animation = 'shake 0.5s ease-in-out';
+                errorPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
                 
                 setTimeout(() => {
                     errorPopup.style.display = 'none';
-                }, 1900); // Set to slightly less than animation duration to prevent gap
+                }, 900);
             }
             document.getElementById('codeInput').value = ''; // Clear input
         }
 
         // Initialize and start timers
         updateRevealedLetters();
-        setInterval(updateTimer, 1000);
+        updateTimer(); // Call immediately
+        setInterval(updateTimer, 1000); // Update every second
         setInterval(updateRevealedLetters, 60000); // Check for new reveals every minute
 
         // Reset button for testing (you can remove this in production)
