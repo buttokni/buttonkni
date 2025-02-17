@@ -72,18 +72,25 @@
             100% { background-color: #ff0000; }
         }
 
-        .error-popup {
+        .error-popup, .success-popup {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translate(-50%, 0);
-            background-color: #ff3333;
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 14px;
             animation: shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
             display: none;
+        }
+
+        .error-popup {
+            background-color: #ff3333;
+        }
+
+        .success-popup {
+            background-color: #33ff66;
         }
 
         .code-input {
@@ -164,6 +171,7 @@
         </div>
 
         <div class="error-popup" id="errorPopup">wrong</div>
+        <div class="success-popup" id="successPopup">Congratulations! You're gay.</div>
 
         <div class="hint-container">
             <h3>hint</h3>
@@ -239,7 +247,19 @@
             const errorPopup = document.getElementById('errorPopup');
             
             if (input === correctCode) {
-                // Do nothing for now, will be implemented later
+                const successPopup = document.getElementById('successPopup');
+                if (successPopup.style.display === 'block') {
+                    return;
+                }
+                
+                successPopup.style.display = 'block';
+                successPopup.style.animation = 'none';
+                successPopup.offsetHeight; // Trigger reflow
+                successPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
+                
+                setTimeout(() => {
+                    successPopup.style.display = 'none';
+                }, 900);
             } else {
                 // If animation is already running, don't start a new one
                 if (errorPopup.style.display === 'block') {
