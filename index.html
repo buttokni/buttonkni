@@ -1,9 +1,14 @@
-<!DOCTYPE html>
+function updateTimer() {
+            const now = new Date();
+            const startTime = new Date(startDate);
+            const minutesPassed = Math.floor((now - startTime) / (1000 * 60));
+            const nextReveal = Math.ceil(minutesPassed / 10) * 10; // Next 10-minute mark
+            const timeToNext = (nextRevea<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>diddy</title>
+    <title>Ryan's Cool Code</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -160,7 +165,7 @@
 <body>
     <div class="container">
         <div class="image-container">
-            <img src="https://lh7-us.googleusercontent.com/x5gqgqsNKMxxj1rK8e-fg_pp5t_WiM1sPZsE7eNcvZ_3hnebxZFKweji32Q2q5ntiBgbQ90hOqhKrdZLR7rWuakI9_hn_swBaaKwFvjWfPXIRZlqfl8hwB_aAdYfCQT1yF8FmkeejRFLbkJp5fTcfeUOTA2yuA" alt="Challenge Image">
+            <img src="https://lh5.googleusercontent.com/Q791KxLk7CN4lBjY7II4Ac07uft_Twz6nIpP2tBTDA64elH3sx8CEUwJ5-MF-pPF80BbFQgKvAEuHCL0ZusmzaQXaznPSAtSzSPmWbdjuW2da8Om3jFddHeh2Nk8pme7koP_Wc2fujo=w740" alt="Challenge Image">
         </div>
         
         <div class="hint-progress" id="hintProgress"></div>
@@ -180,16 +185,16 @@
     </div>
 
     <script>
-        const correctCode = 'dilated';
+        const correctCode = 'ryansep';
 
         const hints = [
-            "The first letter is 'd'",
-            "The second letter is 'i'",
-            "The third letter is 'l'",
-            "The fourth letter is 'a'",
-            "The fifth letter is 't'",
+            "The first letter is 'r'",
+            "The second letter is 'y'",
+            "The third letter is 'a'",
+            "The fourth letter is 'n'",
+            "The fifth letter is 's'",
             "The sixth letter is 'e'",
-            "The final letter is 'd'"
+            "The final letter is 'p'"
         ];
 
         // Get initial state or set default
@@ -200,19 +205,23 @@
         }
 
         function updateRevealedLetters() {
-            const daysPassed = Math.floor((new Date() - new Date(startDate)) / (1000 * 60 * 60 * 24));
+            // Calculate minutes passed instead of days
+            const minutesPassed = Math.floor((new Date() - new Date(startDate)) / (1000 * 60));
+            // Every 10 minutes, show a new letter
+            const lettersToShow = Math.floor(minutesPassed / 10);
+            
             const hintProgressDiv = document.getElementById('hintProgress');
             hintProgressDiv.innerHTML = ''; // Clear existing hints
             
-            // Show progress for each day that has passed
-            for (let day = 0; day <= Math.min(daysPassed, correctCode.length - 1); day++) {
+            // Show progress for each 10-minute interval that has passed
+            for (let step = 0; step <= Math.min(lettersToShow, correctCode.length - 1); step++) {
                 const hintLine = document.createElement('div');
                 hintLine.className = 'hint-line';
                 let line = '';
                 
                 // Build the line with revealed letters and dashes
                 for (let i = 0; i < correctCode.length; i++) {
-                    if (i <= day) {
+                    if (i <= step) {
                         line += correctCode[i].toUpperCase();
                     } else {
                         line += '-';
@@ -267,7 +276,7 @@
                 submitButton.style.display = 'none';
                 
                 // Change image
-                image.src = 'https://lh7-us.googleusercontent.com/ZYWCJvyRjPnufQg6NApxIfVSGgt_Fo0WMOwWrOekR2pq5QjROu5LZUYxeb-OdAsxv_l4gJyiL3tUnaYAtdL00uichq7B-BHXmrdJP-bO8ZVJrEvAIe7MKI8XdIZvGt8SQhjZXofxP-IvSsek3P2GuaSOTAInKw';
+                image.src = 'https://lh7-us.googleusercontent.com/zPaagbleRwL6WU8hyWBiINmpVa3Nu2b5BRweiTeQ1MuQkrH-Ta35o6S6HprNQlhgErNcboEPCaacSrvjhjCBjD3wLBEMG6MOMgTVeIJHr2s21ikJO_PDrupIFSQvx55f_GlK8cXwblCn1fAQSWR9gtnrEof8xw';
                 
                 setTimeout(() => {
                     successPopup.style.display = 'none';
