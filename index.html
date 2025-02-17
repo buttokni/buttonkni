@@ -193,11 +193,9 @@
         ];
 
         // Get initial state or set default
-        let startDate = localStorage.getItem('startDate');
-        if (!startDate) {
-            startDate = new Date().toISOString();
-            localStorage.setItem('startDate', startDate);
-        }
+        // Set startDate to current time when page loads
+        startDate = new Date().toISOString();
+        localStorage.setItem('startDate', startDate);
 
         function getMinutesPassed() {
             return Math.floor((new Date() - new Date(startDate)) / (1000 * 60));
@@ -205,32 +203,30 @@
 
         function updateRevealedLetters() {
             const minutesPassed = getMinutesPassed();
-            const lettersToShow = Math.min(Math.floor(minutesPassed / 10), correctCode.length);
+            const letterToShow = Math.min(Math.floor(minutesPassed / 10), correctCode.length - 1);
             
             const hintProgressDiv = document.getElementById('hintProgress');
-            hintProgressDiv.innerHTML = ''; // Clear existing hints
+            hintProgressDiv.innerHTML = ''; // Clear existing hint
             
-            // Show progress for each revealed letter
-            for (let revealed = 0; revealed < lettersToShow; revealed++) {
-                const hintLine = document.createElement('div');
-                hintLine.className = 'hint-line';
-                let line = '';
-                
-                // Build the line with revealed letters and dashes
-                for (let i = 0; i < correctCode.length; i++) {
-                    if (i <= revealed) {
-                        line += correctCode[i].toUpperCase();
-                    } else {
-                        line += '-';
-                    }
-                    if (i < correctCode.length - 1) {
-                        line += ' ';
-                    }
+            // Show single line with current progress
+            const hintLine = document.createElement('div');
+            hintLine.className = 'hint-line';
+            let line = '';
+            
+            // Build the line with revealed letters and dashes
+            for (let i = 0; i < correctCode.length; i++) {
+                if (i <= letterToShow) {
+                    line += correctCode[i].toUpperCase();
+                } else {
+                    line += '-';
                 }
-                
-                hintLine.textContent = line;
-                hintProgressDiv.appendChild(hintLine);
+                if (i < correctCode.length - 1) {
+                    line += ' ';
+                }
             }
+            
+            hintLine.textContent = line;
+            hintProgressDiv.appendChild(hintLine);
         }
 
         function updateTimer() {
