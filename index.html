@@ -192,13 +192,28 @@
             "The final letter is 'd'"
         ];
 
-        // Get initial state or set default
-        // Set startDate to current time when page loads
-        startDate = new Date().toISOString();
+        // Initialize with current time and start timers
+        let startDate = new Date().toISOString();
         localStorage.setItem('startDate', startDate);
 
         function getMinutesPassed() {
-            return Math.floor((new Date() - new Date(startDate)) / (1000 * 60));
+            const now = new Date();
+            const start = new Date(startDate);
+            return Math.floor((now - start) / (1000 * 60));
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const start = new Date(startDate);
+            const elapsed = now - start;
+            const nextInterval = Math.ceil(elapsed / (10 * 60 * 1000)) * (10 * 60 * 1000);
+            const remaining = nextInterval - elapsed;
+            
+            const minutes = Math.floor(remaining / (60 * 1000));
+            const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
+            
+            document.getElementById('timer').textContent = 
+                `${minutes}m ${seconds}s`;
         }
 
         function updateRevealedLetters() {
@@ -227,16 +242,6 @@
             
             hintLine.textContent = line;
             hintProgressDiv.appendChild(hintLine);
-        }
-
-        function updateTimer() {
-            const minutesPassed = getMinutesPassed();
-            const nextRevealMinute = Math.ceil(minutesPassed / 10) * 10;
-            const minutesToNext = nextRevealMinute - minutesPassed;
-            const secondsToNext = 60 - (new Date().getSeconds());
-            
-            document.getElementById('timer').textContent = 
-                `${minutesToNext}m ${secondsToNext}s`;
         }
 
         function checkCode() {
@@ -291,7 +296,7 @@
         updateRevealedLetters();
         updateTimer(); // Call immediately
         setInterval(updateTimer, 1000); // Update timer every second
-        setInterval(updateRevealedLetters, 5000); // Check for new reveals every 5 seconds
+        setInterval(updateRevealedLetters, 1000); // Check for new reveals every second
 
         // Reset button for testing (you can remove this in production)
         function resetProgress() {
