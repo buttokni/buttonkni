@@ -451,6 +451,54 @@
             hintProgressDiv.appendChild(hintLine);
         }
 
+// Add this after your leaderboard initialization
+function addToLeaderboard(completionTime) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const currentDate = new Date().toISOString();
+    
+    // Add to daily leaderboard
+    const existingDailyEntry = dailyLeaderboard.find(entry => entry.username === currentUser.username);
+    if (existingDailyEntry) {
+        if (completionTime < existingDailyEntry.completionTime) {
+            existingDailyEntry.completionTime = completionTime;
+            existingDailyEntry.date = currentDate;
+        }
+    } else {
+        dailyLeaderboard.push({
+            username: currentUser.username,
+            completionTime: completionTime,
+            date: currentDate
+        });
+    }
+    
+    // Add to all-time leaderboard
+    const existingAllTimeEntry = allTimeLeaderboard.find(entry => 
+        entry.username === currentUser.username && 
+        entry.code === correctCode
+    );
+    
+    if (existingAllTimeEntry) {
+        if (completionTime < existingAllTimeEntry.completionTime) {
+            existingAllTimeEntry.completionTime = completionTime;
+            existingAllTimeEntry.date = currentDate;
+        }
+    } else {
+        allTimeLeaderboard.push({
+            username: currentUser.username,
+            completionTime: completionTime,
+            date: currentDate,
+            code: correctCode
+        });
+    }
+    
+    // Save both leaderboards
+    localStorage.setItem('dailyLeaderboard', JSON.stringify(dailyLeaderboard));
+    localStorage.setItem('allTimeLeaderboard', JSON.stringify(allTimeLeaderboard));
+    
+    // Update display
+    updateLeaderboard('daily');
+}
+        
 function checkCode() {
     const input = document.getElementById('codeInput').value.toLowerCase();
     console.log("Input:", input, "Correct code:", correctCode); // Debug log
