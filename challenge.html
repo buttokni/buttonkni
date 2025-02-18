@@ -515,36 +515,37 @@
             document.getElementById('codeInput').value = '';
         }
 
-        async function addToLeaderboard(completionTime) {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            const currentDate = new Date().toISOString();
-            
-            try {
-                // Add to daily leaderboard
-                const dailyRef = db.collection('dailyLeaderboard');
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                const dailyQuery = await dailyRef
-                    .where('username', '==', currentUser.username)
-                    .where('date', '>=', today)
-                    .get();
+async function addToLeaderboard(completionTime) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const currentDate = new Date().toISOString();
+    
+    try {
+        // Add to daily leaderboard
+        const dailyRef = db.collection('dailyLeaderboard');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const dailyQuery = await dailyRef
+            .where('username', '==', currentUser.username)
+            .where('date', '>=', today)
+            .get();
 
-                if (!dailyQuery.empty) {
-                    const doc = dailyQuery.docs[0];
-                    if (completionTime < doc.data().completionTime) {
-                        await doc.ref.update({
-                            completionTime: completionTime,
-                            date: currentDate
-                        });
-                    }
-                } else {
-                    await dailyRef.add({
-                        username: currentUser.username,
-                        completionTime: completionTime,
-                        date: currentDate
-                    });
-                }
+        if (!dailyQuery.empty) {
+            const doc = dailyQuery.docs[0];
+            if (completionTime < doc.data().completionTime) {
+                await doc.ref.update({
+                    completionTime: completionTime,
+                    username: currentUser.username,  // Added to ensure consistency
+                    date: currentDate
+                });
+            }
+        } else {
+            await dailyRef.add({
+                username: currentUser.username,
+                completionTime: completionTime,  // Make sure this is being set
+                date: currentDate
+            });
+        }
                 
                 // Add to all-time leaderboard
                 const allTimeRef = db.collection('allTimeLeaderboard');
@@ -573,10 +574,10 @@
                 // Update display
                 updateLeaderboard('daily');
                 console.log("Successfully added to leaderboard");
-            } catch (error) {
-                console.error("Error adding to leaderboard:", error);
-            }
-        }
+    } catch (error) {
+        console.error("Error adding to leaderboard:", error);
+    }
+}
 
        async function updateLeaderboard(type = 'daily') {
     const leaderboardElement = document.getElementById(`${type}Leaderboard`);
