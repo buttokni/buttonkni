@@ -1,359 +1,298 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Code Challenge</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            background-color: #0a1929;
-            color: white;
-            position: relative;
-        }
-
-        .account-menu {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .account-button {
-            background: transparent;
-            border: 2px solid #ff0000;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: white;
-            animation: rainbow 5s linear infinite;
-        }
-
-        .account-dropdown {
-            position: absolute;
-            top: 50px;
-            right: 0;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 15px;
-            min-width: 200px;
-            backdrop-filter: blur(10px);
-            display: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-
-        .account-dropdown.show {
-            display: block;
-        }
-
-        .account-info {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .account-info p {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        .logout-button {
-            width: 100%;
-            padding: 8px;
-            background-color: #ff3333;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .logout-button:hover {
-            background-color: #ff4444;
-        }
-
-        .container {
-            max-width: 400px;
-            width: 100%;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            margin-top: 50px;
-        }
-
-        .form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        input[type="text"],
-        input[type="password"],
-        input[type="email"] {
-            padding: 10px;
-            font-size: 16px;
-            background: transparent;
-            border: 3px solid #ff0000;
-            border-radius: 8px;
-            color: white;
-            animation: rainbow 5s linear infinite;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            animation: rainbowBackground 5s linear infinite;
-            transition: transform 0.2s;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-        }
-
-        .message {
-            text-align: center;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-
-        .error-message {
-            background-color: rgba(255, 51, 51, 0.2);
-            color: #ff3333;
-        }
-
-        .success-message {
-            background-color: rgba(51, 255, 51, 0.2);
-            color: #33ff33;
-        }
-
-        .toggle-form {
-            color: #0099ff;
-            text-decoration: underline;
-            cursor: pointer;
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        @keyframes rainbow {
-            0% { border-color: #ff0000; }
-            17% { border-color: #ff8800; }
-            33% { border-color: #ffff00; }
-            50% { border-color: #00ff00; }
-            67% { border-color: #0099ff; }
-            83% { border-color: #6633ff; }
-            100% { border-color: #ff0000; }
-        }
-
-        @keyframes rainbowBackground {
-            0% { background-color: #ff0000; }
-            17% { background-color: #ff8800; }
-            33% { background-color: #ffff00; }
-            50% { background-color: #00ff00; }
-            67% { background-color: #0099ff; }
-            83% { background-color: #6633ff; }
-            100% { background-color: #ff0000; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container" id="loginContainer">
-        <h2 style="text-align: center;">Login to Code Challenge</h2>
-        <form class="form" id="loginForm" onsubmit="return handleLogin(event)">
-            <div class="input-group">
-                <label for="loginUsername">Username</label>
-                <input type="text" id="loginUsername" required>
+<!-- Add this HTML right before the closing body tag -->
+<div class="leaderboard-container">
+    <button class="leaderboard-button" onclick="toggleLeaderboard()">🏆</button>
+    <div class="leaderboard-modal" id="leaderboardModal">
+        <div class="leaderboard-content">
+            <div class="leaderboard-header">
+                <h2>Leaderboard</h2>
+                <button class="close-button" onclick="toggleLeaderboard()">×</button>
             </div>
-            <div class="input-group">
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" required>
+            <div class="leaderboard-tabs">
+                <button class="tab-button active" onclick="switchTab('daily')">Today's Records</button>
+                <button class="tab-button" onclick="switchTab('allTime')">All-Time Best</button>
             </div>
-            <div class="checkbox-group">
-                <input type="checkbox" id="rememberMe">
-                <label for="rememberMe">Remember me</label>
+            <div id="dailyLeaderboard" class="leaderboard-body">
+                <!-- Daily records will be inserted here -->
             </div>
-            <button type="submit">Login</button>
-            <p id="loginMessage" class="message"></p>
-        </form>
-        <p class="toggle-form" onclick="toggleForms()">Don't have an account? Register here</p>
+            <div id="allTimeLeaderboard" class="leaderboard-body" style="display: none;">
+                <!-- All-time records will be inserted here -->
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="container" id="registerContainer" style="display: none;">
-        <h2 style="text-align: center;">Register for Code Challenge</h2>
-        <form class="form" id="registerForm" onsubmit="return handleRegister(event)">
-            <div class="input-group">
-                <label for="registerUsername">Username</label>
-                <input type="text" id="registerUsername" required>
-            </div>
-            <div class="input-group">
-                <label for="registerEmail">Email</label>
-                <input type="email" id="registerEmail" required>
-            </div>
-            <div class="input-group">
-                <label for="registerPassword">Password</label>
-                <input type="password" id="registerPassword" required minlength="8">
-            </div>
-            <div class="input-group">
-                <label for="confirmPassword">Confirm Password</label>
-                <input type="password" id="confirmPassword" required>
-            </div>
-            <button type="submit">Register</button>
-            <p id="registerMessage" class="message"></p>
-        </form>
-        <p class="toggle-form" onclick="toggleForms()">Already have an account? Login here</p>
-    </div>
+<style>
+.leaderboard-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
 
-    <script>
-        // Initialize users array from localStorage or create empty array
-        let users = JSON.parse(localStorage.getItem('users')) || [];
+.leaderboard-button {
+    background: transparent;
+    border: 2px solid #ff0000;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+    animation: rainbow 5s linear infinite;
+}
 
-        // Check for remembered user
-        window.onload = function() {
-            const rememberedUser = localStorage.getItem('rememberedUser');
-            if (rememberedUser) {
-                const user = JSON.parse(rememberedUser);
-                document.getElementById('loginUsername').value = user.username;
-                document.getElementById('rememberMe').checked = true;
-            }
+.leaderboard-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 1001;
+}
 
-            // Check if already logged in
-            if (localStorage.getItem('isLoggedIn') === 'true') {
-                window.location.href = 'challenge.html';
-            }
+.leaderboard-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #0a1929;
+    border: 3px solid;
+    animation: rainbow 5s linear infinite;
+    border-radius: 15px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.leaderboard-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+    border-radius: 20px;
+}
+
+.tab-button.active {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.leaderboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.leaderboard-header h2 {
+    margin: 0;
+    color: white;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.leaderboard-body {
+    color: white;
+}
+
+.leaderboard-entry {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 15px;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
+}
+
+.rank {
+    font-weight: bold;
+    min-width: 30px;
+}
+
+.medal {
+    font-size: 20px;
+    margin-right: 5px;
+}
+
+.completion-time {
+    text-align: right;
+    font-family: monospace;
+}
+
+.username {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.date-completed {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    grid-column: 2 / -1;
+    text-align: right;
+}
+</style>
+
+<script>
+// Initialize leaderboards from localStorage or create empty arrays
+let dailyLeaderboard = JSON.parse(localStorage.getItem('dailyLeaderboard')) || [];
+let allTimeLeaderboard = JSON.parse(localStorage.getItem('allTimeLeaderboard')) || [];
+
+// Check if we need to reset daily leaderboard
+const lastResetDate = localStorage.getItem('lastResetDate');
+const today = new Date().toDateString();
+
+if (lastResetDate !== today) {
+    dailyLeaderboard = [];
+    localStorage.setItem('dailyLeaderboard', JSON.stringify(dailyLeaderboard));
+    localStorage.setItem('lastResetDate', today);
+}
+
+function toggleLeaderboard() {
+    const modal = document.getElementById('leaderboardModal');
+    if (modal.style.display === 'block') {
+        modal.style.display = 'none';
+    } else {
+        updateLeaderboard('daily');
+        modal.style.display = 'block';
+    }
+}
+
+function switchTab(tab) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // Show selected leaderboard
+    document.getElementById('dailyLeaderboard').style.display = tab === 'daily' ? 'block' : 'none';
+    document.getElementById('allTimeLeaderboard').style.display = tab === 'allTime' ? 'block' : 'none';
+
+    updateLeaderboard(tab);
+}
+
+function formatDate(date) {
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    return new Date(date).toLocaleDateString(undefined, options);
+}
+
+function updateLeaderboard(type = 'daily') {
+    const leaderboardElement = document.getElementById(`${type}Leaderboard`);
+    const leaderboardData = type === 'daily' ? dailyLeaderboard : allTimeLeaderboard;
+    
+    // Sort leaderboard by completion time
+    const sortedLeaderboard = [...leaderboardData].sort((a, b) => a.completionTime - b.completionTime);
+    
+    leaderboardElement.innerHTML = '';
+
+    sortedLeaderboard.forEach((entry, index) => {
+        const entryElement = document.createElement('div');
+        entryElement.className = 'leaderboard-entry';
+
+        // Determine medal emoji for top 3
+        let medal = '';
+        if (index === 0) medal = '🥇';
+        else if (index === 1) medal = '🥈';
+        else if (index === 2) medal = '🥉';
+
+        // Format completion time
+        const minutes = Math.floor(entry.completionTime / 60000);
+        const seconds = ((entry.completionTime % 60000) / 1000).toFixed(1);
+        const timeString = `${minutes}m ${seconds}s`;
+
+        entryElement.innerHTML = `
+            <div class="rank">${medal || (index + 1)}</div>
+            <div class="username">${entry.username}</div>
+            <div class="completion-time">${timeString}</div>
+            ${type === 'allTime' ? `<div class="date-completed">Set on ${formatDate(entry.date)}</div>` : ''}
+        `;
+
+        leaderboardElement.appendChild(entryElement);
+    });
+
+    if (sortedLeaderboard.length === 0) {
+        leaderboardElement.innerHTML = '<p style="text-align: center">No completions yet!</p>';
+    }
+}
+
+function addToLeaderboard(completionTime) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const currentDate = new Date().toISOString();
+    
+    // Add to daily leaderboard
+    const existingDailyEntry = dailyLeaderboard.find(entry => entry.username === currentUser.username);
+    if (existingDailyEntry) {
+        if (completionTime < existingDailyEntry.completionTime) {
+            existingDailyEntry.completionTime = completionTime;
+            existingDailyEntry.date = currentDate;
         }
-
-        function toggleForms() {
-            const loginContainer = document.getElementById('loginContainer');
-            const registerContainer = document.getElementById('registerContainer');
-            
-            if (loginContainer.style.display === 'none') {
-                loginContainer.style.display = 'block';
-                registerContainer.style.display = 'none';
-            } else {
-                loginContainer.style.display = 'none';
-                registerContainer.style.display = 'block';
-            }
-            
-            // Clear messages and forms
-            document.getElementById('loginMessage').style.display = 'none';
-            document.getElementById('registerMessage').style.display = 'none';
-            document.getElementById('loginForm').reset();
-            document.getElementById('registerForm').reset();
+    } else {
+        dailyLeaderboard.push({
+            username: currentUser.username,
+            completionTime: completionTime,
+            date: currentDate
+        });
+    }
+    
+    // Add to all-time leaderboard
+    const existingAllTimeEntry = allTimeLeaderboard.find(entry => 
+        entry.username === currentUser.username && 
+        entry.code === correctCode
+    );
+    
+    if (existingAllTimeEntry) {
+        if (completionTime < existingAllTimeEntry.completionTime) {
+            existingAllTimeEntry.completionTime = completionTime;
+            existingAllTimeEntry.date = currentDate;
         }
+    } else {
+        allTimeLeaderboard.push({
+            username: currentUser.username,
+            completionTime: completionTime,
+            date: currentDate,
+            code: correctCode
+        });
+    }
+    
+    // Save both leaderboards
+    localStorage.setItem('dailyLeaderboard', JSON.stringify(dailyLeaderboard));
+    localStorage.setItem('allTimeLeaderboard', JSON.stringify(allTimeLeaderboard));
+    
+    // Update display
+    updateLeaderboard('daily');
+}
 
-        function showMessage(elementId, message, isError = true) {
-            const messageElement = document.getElementById(elementId);
-            messageElement.textContent = message;
-            messageElement.style.display = 'block';
-            messageElement.className = `message ${isError ? 'error-message' : 'success-message'}`;
-            setTimeout(() => {
-                messageElement.style.display = 'none';
-            }, 3000);
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
-            
-            const user = users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                if (rememberMe) {
-                    localStorage.setItem('rememberedUser', JSON.stringify({ username: username }));
-                } else {
-                    localStorage.removeItem('rememberedUser');
-                }
-                
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('currentUser', JSON.stringify({
-                    username: user.username,
-                    email: user.email
-                }));
-                
-                window.location.href = 'challenge.html';
-            } else {
-                showMessage('loginMessage', 'Invalid username or password');
-            }
-            
-            return false;
-        }
-
-        function handleRegister(event) {
-            event.preventDefault();
-            
-            const username = document.getElementById('registerUsername').value;
-            const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            // Validation
-            if (users.some(u => u.username === username)) {
-                showMessage('registerMessage', 'Username already exists');
-                return false;
-            }
-            
-            if (password !== confirmPassword) {
-                showMessage('registerMessage', 'Passwords do not match');
-                return false;
-            }
-            
-            if (password.length < 8) {
-                showMessage('registerMessage', 'Password must be at least 8 characters long');
-                return false;
-            }
-            
-            // Add new user
-            users.push({
-                username,
-                email,
-                password
-            });
-            
-            // Save updated users array
-            localStorage.setItem('users', JSON.stringify(users));
-            
-            showMessage('registerMessage', 'Registration successful! Please login.', false);
-            
-            // Clear form and switch to login after short delay
-            setTimeout(() => {
-                document.getElementById('registerForm').reset();
-                toggleForms();
-            }, 2000);
-            
-            return false;
-        }
-    </script>
-</body>
-</html>
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('leaderboardModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+});
+</script>
