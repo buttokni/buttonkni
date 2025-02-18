@@ -167,6 +167,48 @@
     </style>
 </head>
 <body>
+    <div class="account-menu">
+    <button class="account-button" onclick="toggleAccountMenu()">👤</button>
+    <div class="account-dropdown" id="accountDropdown">
+        <div class="account-info">
+            <p><strong>Username:</strong> <span id="menuUsername"></span></p>
+            <p><strong>Email:</strong> <span id="menuEmail"></span></p>
+        </div>
+        <button class="logout-button" onclick="handleLogout()">Logout</button>
+    </div>
+</div>
+
+<script>
+    // Check login status and initialize user info
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+        window.location.href = 'index.html';
+    } else {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        document.getElementById('menuUsername').textContent = currentUser.username;
+        document.getElementById('menuEmail').textContent = currentUser.email;
+    }
+
+    function toggleAccountMenu() {
+        const dropdown = document.getElementById('accountDropdown');
+        dropdown.classList.toggle('show');
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('currentUser');
+        window.location.href = 'index.html';
+    }
+
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('accountDropdown');
+        const accountButton = event.target.closest('.account-button');
+        
+        if (!accountButton && dropdown.classList.contains('show')) {
+            dropdown.classList.remove('show');
+        }
+    });
+</script>
     <div class="container">
         <div class="image-container">
             <img src="https://lh7-us.googleusercontent.com/x5gqgqsNKMxxj1rK8e-fg_pp5t_WiM1sPZsE7eNcvZ_3hnebxZFKweji32Q2q5ntiBgbQ90hOqhKrdZLR7rWuakI9_hn_swBaaKwFvjWfPXIRZlqfl8hwB_aAdYfCQT1yF8FmkeejRFLbkJp5fTcfeUOTA2yuA" alt="Challenge Image">
