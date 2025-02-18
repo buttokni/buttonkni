@@ -579,7 +579,7 @@ async function addToLeaderboard(completionTime) {
     }
 }
 
-       async function updateLeaderboard(type = 'daily') {
+  async function updateLeaderboard(type = 'daily') {
     const leaderboardElement = document.getElementById(`${type}Leaderboard`);
     const collectionRef = db.collection(type === 'daily' ? 'dailyLeaderboard' : 'allTimeLeaderboard');
     
@@ -588,9 +588,11 @@ async function addToLeaderboard(completionTime) {
         if (type === 'daily') {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
+            console.log("Today's date for query:", today); // Debug log
+
             query = query
                 .where('date', '>=', today)
-                .orderBy('date')  // Add this line
+                .orderBy('date')
                 .orderBy('completionTime', 'asc');
         } else {
             query = query.orderBy('completionTime', 'asc');
@@ -598,37 +600,38 @@ async function addToLeaderboard(completionTime) {
         
         const snapshot = await query.limit(100).get();
         const entries = snapshot.docs.map(doc => doc.data());
-                
-                leaderboardElement.innerHTML = '';
+        console.log(`${type} entries:`, entries); // Debug log
+        
+        leaderboardElement.innerHTML = '';
 
-                entries.forEach((entry, index) => {
-                    const entryElement = document.createElement('div');
-                    entryElement.className = 'leaderboard-entry';
+        entries.forEach((entry, index) => {
+            const entryElement = document.createElement('div');
+            entryElement.className = 'leaderboard-entry';
 
-                    let medal = '';
-                    if (index === 0) medal = '🥇';
-                    else if (index === 1) medal = '🥈';
-                    else if (index === 2) medal = '🥉';
+            let medal = '';
+            if (index === 0) medal = '🥇';
+            else if (index === 1) medal = '🥈';
+            else if (index === 2) medal = '🥉';
 
-                    const minutes = Math.floor(entry.completionTime / 60000);
-                    const seconds = ((entry.completionTime % 60000) / 1000).toFixed(1);
-                    const timeString = `${minutes}m ${seconds}s`;
+            const minutes = Math.floor(entry.completionTime / 60000);
+            const seconds = ((entry.completionTime % 60000) / 1000).toFixed(1);
+            const timeString = `${minutes}m ${seconds}s`;
 
-                    entryElement.innerHTML = `
-                        <div class="rank">${medal || (index + 1)}</div>
-                        <div class="username">${entry.username}</div>
-                        <div class="completion-time">${timeString}</div>
-                        ${type === 'allTime' ? `
-                            <div class="date-completed">
-                                Code: "${entry.code}" on ${formatDate(entry.date)}
-                            </div>
-                        ` : ''}
-                    `;
+            entryElement.innerHTML = `
+                <div class="rank">${medal || (index + 1)}</div>
+                <div class="username">${entry.username}</div>
+                <div class="completion-time">${timeString}</div>
+                ${type === 'allTime' ? `
+                    <div class="date-completed">
+                        Code: "${entry.code}" on ${formatDate(entry.date)}
+                    </div>
+                ` : ''}
+            `;
 
-                    leaderboardElement.appendChild(entryElement);
-                });
+            leaderboardElement.appendChild(entryElement);
+        });
 
-           if (entries.length === 0) {
+        if (entries.length === 0) {
             leaderboardElement.innerHTML = '<p style="text-align: center">No completions yet!</p>';
         }
     } catch (error) {
