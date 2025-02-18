@@ -459,50 +459,26 @@
             hintProgressDiv.appendChild(hintLine);
         }
 
-        function checkCode() {
-            const input = document.getElementById('codeInput').value.toLowerCase();
-            console.log("Checking code:", input);
+async function checkCode() {
+    const input = document.getElementById('codeInput').value.toLowerCase();
+    console.log("Checking code:", input);
+    
+    if (input === correctCode) {
+        // Check if user has already completed today's challenge successfully
+        try {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const dailyRef = db.collection('dailyLeaderboard');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
             
-            if (input === correctCode) {
-                console.log("Correct code entered!");
-                
-                // Calculate completion time
-                const start = new Date(localStorage.getItem('startDate'));
-                const completionTime = new Date() - start;
-                
-                console.log("Adding to leaderboard with time:", completionTime);
-                
-                // Add to leaderboard
-                addToLeaderboard(completionTime);
+            const dailyQuery = await dailyRef
+                .where('username', '==', currentUser.username)
+                .where('date', '>=', firebase.firestore.Timestamp.fromDate(today))
+                .get();
 
-                const successPopup = document.getElementById('successPopup');
-                const codeInput = document.getElementById('codeInput');
-                const submitButton = codeInput.nextElementSibling;
-                const image = document.querySelector('.image-container img');
-                
-                // Show success message
-                successPopup.style.display = 'block';
-                successPopup.style.animation = 'none';
-                successPopup.offsetHeight; // Trigger reflow
-                successPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
-                
-                // Hide input and button
-                codeInput.style.display = 'none';
-                submitButton.style.display = 'none';
-                
-                // Change image
-                image.src = 'https://lh7-us.googleusercontent.com/ZYWCJvyRjPnufQg6NApxIfVSGgt_Fo0WMOwWrOekR2pq5QjROu5LZUYxeb-OdAsxv_l4gJyiL3tUnaYAtdL00uichq7B-BHXmrdJP-bO8ZVJrEvAIe7MKI8XdIZvGt8SQhjZXofxP-IvSsek3P2GuaSOTAInKw';
-                
-                setTimeout(() => {
-                    successPopup.style.display = 'none';
-                }, 2000);
-            } else {
+            if (!dailyQuery.empty) {
                 const errorPopup = document.getElementById('errorPopup');
-                
-                if (errorPopup.style.display === 'block') {
-                    return;
-                }
-                
+                errorPopup.textContent = "You've already completed today's challenge!";
                 errorPopup.style.display = 'block';
                 errorPopup.style.animation = 'none';
                 errorPopup.offsetHeight;
@@ -510,10 +486,59 @@
                 
                 setTimeout(() => {
                     errorPopup.style.display = 'none';
-                }, 900);
+                    errorPopup.textContent = 'wrong'; // Reset text for wrong answers
+                }, 2000);
+                
+                document.getElementById('codeInput').value = '';
+                return;
             }
-            document.getElementById('codeInput').value = '';
+
+            // If they haven't completed it yet, proceed with success logic
+            console.log("Correct code entered!");
+            const start = new Date(localStorage.getItem('startDate'));
+            const completionTime = new Date() - start;
+            console.log("Adding to leaderboard with time:", completionTime);
+            await addToLeaderboard(completionTime);
+
+            const successPopup = document.getElementById('successPopup');
+            const codeInput = document.getElementById('codeInput');
+            const submitButton = codeInput.nextElementSibling;
+            const image = document.querySelector('.image-container img');
+            
+            successPopup.style.display = 'block';
+            successPopup.style.animation = 'none';
+            successPopup.offsetHeight;
+            successPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
+            
+            codeInput.style.display = 'none';
+            submitButton.style.display = 'none';
+            
+            image.src = 'https://lh7-us.googleusercontent.com/ZYWCJvyRjPnufQg6NApxIfVSGgt_Fo0WMOwWrOekR2pq5QjROu5LZUYxeb-OdAsxv_l4gJyiL3tUnaYAtdL00uichq7B-BHXmrdJP-bO8ZVJrEvAIe7MKI8XdIZvGt8SQhjZXofxP-IvSsek3P2GuaSOTAInKw';
+            
+            setTimeout(() => {
+                successPopup.style.display = 'none';
+            }, 2000);
+        } catch (error) {
+            console.error("Error checking daily completion:", error);
         }
+    } else {
+        const errorPopup = document.getElementById('errorPopup');
+        
+        if (errorPopup.style.display === 'block') {
+            return;
+        }
+        
+        errorPopup.style.display = 'block';
+        errorPopup.style.animation = 'none';
+        errorPopup.offsetHeight;
+        errorPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
+        
+        setTimeout(() => {
+            errorPopup.style.display = 'none';
+        }, 900);
+    }
+    document.getElementById('codeInput').value = '';
+}
 
 async function addToLeaderboard(completionTime) {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
