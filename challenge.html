@@ -451,7 +451,40 @@
             hintProgressDiv.appendChild(hintLine);
         }
 
-// Add this after your leaderboard initialization
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script>
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCxbW8MUxpUy5zkquJSQ5yU2hZ43wU-USs",
+  authDomain: "code-challenge-leaderboa-61eff.firebaseapp.com",
+  databaseURL: "https://code-challenge-leaderboa-61eff-default-rtdb.firebaseio.com",
+  projectId: "code-challenge-leaderboa-61eff",
+  storageBucket: "code-challenge-leaderboa-61eff.firebasestorage.app",
+  messagingSenderId: "310262673238",
+  appId: "1:310262673238:web:d469e985a44e127b86f0f7",
+  measurementId: "G-DKHP8F8ERZ"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Debug logs for initialization
+console.log("Firebase initialized:", !!firebase.app());
+console.log("Firestore initialized:", !!db);
+
+// Test database connection
+db.collection('test').add({
+    test: 'test'
+}).then(() => {
+    console.log("Database connection successful");
+}).catch(error => {
+    console.error("Database connection error:", error);
+});
+
 async function addToLeaderboard(completionTime) {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const currentDate = new Date().toISOString();
@@ -509,96 +542,12 @@ async function addToLeaderboard(completionTime) {
         
         // Update display
         updateLeaderboard('daily');
+        console.log("Successfully added to leaderboard");
     } catch (error) {
         console.error("Error adding to leaderboard:", error);
     }
 }
-        
-function checkCode() {
-    const input = document.getElementById('codeInput').value.toLowerCase();
-    console.log("Input:", input, "Correct code:", correctCode); // Debug log
-    
-    if (input === correctCode) {
-        console.log("Correct code entered!"); // Debug log
-        const start = new Date(localStorage.getItem('startDate'));
-        const completionTime = new Date() - start;
-        
-        // Add to leaderboard
-        addToLeaderboard(completionTime);
 
-        // Get popup elements
-        const successPopup = document.getElementById('successPopup');
-        console.log("Success popup element:", successPopup); // Debug log
-        
-        // Show success message
-        successPopup.style.display = 'block';
-        
-        // Change the image
-        const image = document.querySelector('.image-container img');
-        image.src = 'https://lh7-us.googleusercontent.com/ZYWCJvyRjPnufQg6NApxIfVSGgt_Fo0WMOwWrOekR2pq5QjROu5LZUYxeb-OdAsxv_l4gJyiL3tUnaYAtdL00uichq7B-BHXmrdJP-bO8ZVJrEvAIe7MKI8XdIZvGt8SQhjZXofxP-IvSsek3P2GuaSOTAInKw';
-        
-        // Hide input fields
-        document.getElementById('codeInput').style.display = 'none';
-        document.querySelector('.code-input button').style.display = 'none';
-        
-        setTimeout(() => {
-            successPopup.style.display = 'none';
-        }, 2000);
-    } else {
-        console.log("Wrong code entered!"); // Debug log
-        const errorPopup = document.getElementById('errorPopup');
-        console.log("Error popup element:", errorPopup); // Debug log
-        
-        errorPopup.style.display = 'block';
-        
-        setTimeout(() => {
-            errorPopup.style.display = 'none';
-        }, 2000);
-    }
-    document.getElementById('codeInput').value = '';
-}
-
-        function toggleAccountMenu() {
-            const dropdown = document.getElementById('accountDropdown');
-            dropdown.classList.toggle('show');
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('currentUser');
-            window.location.href = 'index.html';
-        }
-
-        function toggleLeaderboard() {
-            const modal = document.getElementById('leaderboardModal');
-            if (modal.style.display === 'block') {
-                modal.style.display = 'none';
-            } else {
-                updateLeaderboard('daily');
-                modal.style.display = 'block';
-            }
-        }
-
-        function switchTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Show selected leaderboard
-            document.getElementById('dailyLeaderboard').style.display = tab === 'daily' ? 'block' : 'none';
-            document.getElementById('allTimeLeaderboard').style.display = tab === 'allTime' ? 'block' : 'none';
-
-            updateLeaderboard(tab);
-        }
-
-        function formatDate(date) {
-            const options = { month: 'short', day: 'numeric', year: 'numeric' };
-            return new Date(date).toLocaleDateString(undefined, options);
-        }
-
-// Update the leaderboard entry creation in updateLeaderboard function
 async function updateLeaderboard(type = 'daily') {
     const leaderboardElement = document.getElementById(`${type}Leaderboard`);
     const collectionRef = db.collection(type === 'daily' ? 'dailyLeaderboard' : 'allTimeLeaderboard');
@@ -652,47 +601,62 @@ async function updateLeaderboard(type = 'daily') {
     }
 }
 
-        // Close dropdowns when clicking outside
-        window.addEventListener('click', function(event) {
-            const accountDropdown = document.getElementById('accountDropdown');
-            const accountButton = event.target.closest('.account-button');
-            const leaderboardModal = document.getElementById('leaderboardModal');
-            
-            if (!accountButton && accountDropdown.classList.contains('show')) {
-                accountDropdown.classList.remove('show');
-            }
-            
-            if (event.target === leaderboardModal) {
-                leaderboardModal.style.display = 'none';
-            }
-        });
+// Update your existing checkCode function with debug logs
+function checkCode() {
+    const input = document.getElementById('codeInput').value.toLowerCase();
+    console.log("Checking code:", input);
+    
+    if (input === correctCode) {
+        console.log("Correct code entered!");
+        
+        // Calculate completion time
+        const start = new Date(localStorage.getItem('startDate'));
+        const completionTime = new Date() - start;
+        
+        console.log("Adding to leaderboard with time:", completionTime);
+        
+        // Add to leaderboard
+        addToLeaderboard(completionTime);
 
-        // Initialize timers
-        updateRevealedLetters();
-        updateTimer(); // Call immediately
-        setInterval(updateTimer, 1000); // Update timer every second
-        setInterval(updateRevealedLetters, 1000); // Check for new reveals every second
-    </script>
-</body>
-    <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-<script>
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCxbW8MUxpUy5zkquJSQ5yU2hZ43wU-USs",
-  authDomain: "code-challenge-leaderboa-61eff.firebaseapp.com",
-  databaseURL: "https://code-challenge-leaderboa-61eff-default-rtdb.firebaseio.com",
-  projectId: "code-challenge-leaderboa-61eff",
-  storageBucket: "code-challenge-leaderboa-61eff.firebasestorage.app",
-  messagingSenderId: "310262673238",
-  appId: "1:310262673238:web:d469e985a44e127b86f0f7",
-  measurementId: "G-DKHP8F8ERZ"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+        const successPopup = document.getElementById('successPopup');
+        const codeInput = document.getElementById('codeInput');
+        const submitButton = codeInput.nextElementSibling;
+        const image = document.querySelector('.image-container img');
+        
+        // Show success message
+        successPopup.style.display = 'block';
+        successPopup.style.animation = 'none';
+        successPopup.offsetHeight; // Trigger reflow
+        successPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
+        
+        // Hide input and button
+        codeInput.style.display = 'none';
+        submitButton.style.display = 'none';
+        
+        // Change image
+        image.src = 'https://lh7-us.googleusercontent.com/ZYWCJvyRjPnufQg6NApxIfVSGgt_Fo0WMOwWrOekR2pq5QjROu5LZUYxeb-OdAsxv_l4gJyiL3tUnaYAtdL00uichq7B-BHXmrdJP-bO8ZVJrEvAIe7MKI8XdIZvGt8SQhjZXofxP-IvSsek3P2GuaSOTAInKw';
+        
+        setTimeout(() => {
+            successPopup.style.display = 'none';
+        }, 2000);
+    } else {
+        const errorPopup = document.getElementById('errorPopup');
+        
+        if (errorPopup.style.display === 'block') {
+            return;
+        }
+        
+        errorPopup.style.display = 'block';
+        errorPopup.style.animation = 'none';
+        errorPopup.offsetHeight;
+        errorPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
+        
+        setTimeout(() => {
+            errorPopup.style.display = 'none';
+        }, 900);
+    }
+    document.getElementById('codeInput').value = '';
+}
 </script>
+</body>
 </html>
