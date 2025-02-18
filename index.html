@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Code Challenge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-color: #0a1929;
+            color: white;
+        }
+
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            margin-top: 50px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 10px;
+            font-size: 16px;
+            background: transparent;
+            border: 3px solid #ff0000;
+            border-radius: 8px;
+            color: white;
+            animation: rainbow 5s linear infinite;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            animation: rainbowBackground 5s linear infinite;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .error-message {
+            color: #ff3333;
+            text-align: center;
+            display: none;
+        }
+
+        @keyframes rainbow {
+            0% { border-color: #ff0000; }
+            17% { border-color: #ff8800; }
+            33% { border-color: #ffff00; }
+            50% { border-color: #00ff00; }
+            67% { border-color: #0099ff; }
+            83% { border-color: #6633ff; }
+            100% { border-color: #ff0000; }
+        }
+
+        @keyframes rainbowBackground {
+            0% { background-color: #ff0000; }
+            17% { background-color: #ff8800; }
+            33% { background-color: #ffff00; }
+            50% { background-color: #00ff00; }
+            67% { background-color: #0099ff; }
+            83% { background-color: #6633ff; }
+            100% { background-color: #ff0000; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2 style="text-align: center;">Login to Code Challenge</h2>
+        <form class="login-form" onsubmit="return handleLogin(event)">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Login</button>
+            <p id="errorMessage" class="error-message">Invalid username or password</p>
+        </form>
+    </div>
+
+    <script>
+        // Demo credentials (in a real app, these would be stored securely on a server)
+        const DEMO_USERS = [
+            { username: 'demo', password: 'password123' }
+        ];
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Check credentials
+            const user = DEMO_USERS.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                // Store login state
+                localStorage.setItem('isLoggedIn', 'true');
+                // Redirect to main challenge page
+                window.location.href = 'challenge.html';
+            } else {
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 3000);
+            }
+            
+            return false;
+        }
+
+        // Check if user is already logged in
+        window.onload = function() {
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                window.location.href = 'challenge.html';
+            }
+        }
+    </script>
+</body>
+</html>
