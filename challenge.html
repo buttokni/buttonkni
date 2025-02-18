@@ -619,13 +619,18 @@ async function updateLeaderboard(type = 'daily') {
             const seconds = ((entry.completionTime % 60000) / 1000).toFixed(1);
             const timeString = `${minutes}m ${seconds}s`;
 
+            // Check if date is a Firestore Timestamp or string
+            const formattedDate = entry.date && entry.date.toDate ? 
+                formatDate(entry.date.toDate()) : 
+                formatDate(new Date(entry.date));
+
             entryElement.innerHTML = `
                 <div class="rank">${medal || (index + 1)}</div>
                 <div class="username">${entry.username}</div>
                 <div class="completion-time">${timeString}</div>
                 ${type === 'allTime' ? `
                     <div class="date-completed">
-                        Code: "${entry.code}" on ${formatDate(entry.date.toDate())}
+                        Code: "${entry.code}" on ${formattedDate}
                     </div>
                 ` : ''}
             `;
