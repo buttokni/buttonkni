@@ -295,11 +295,17 @@
             hintProgressDiv.appendChild(hintLine);
         }
 
-        function checkCode() {
-            const input = document.getElementById('codeInput').value.toLowerCase();
-            const errorPopup = document.getElementById('errorPopup');
-            
-            if (input === correctCode) {
+      function checkCode() {
+    const input = document.getElementById('codeInput').value.toLowerCase();
+    const errorPopup = document.getElementById('errorPopup');
+    
+    if (input === correctCode) {
+        // Calculate completion time
+        const start = new Date(localStorage.getItem('startDate'));
+        const completionTime = new Date() - start;
+        
+        // Add to leaderboard
+        addToLeaderboard(completionTime);
                 const successPopup = document.getElementById('successPopup');
                 const codeInput = document.getElementById('codeInput');
                 const submitButton = codeInput.nextElementSibling;
@@ -325,6 +331,9 @@
                 setTimeout(() => {
                     successPopup.style.display = 'none';
                 }, 900);
+
+                const successPopup = document.getElementById('successPopup');
+
             } else {
                 // If animation is already running, don't start a new one
                 if (errorPopup.style.display === 'block') {
