@@ -452,51 +452,66 @@
         }
 
 // Add this after your leaderboard initialization
-function addToLeaderboard(completionTime) {
+async function addToLeaderboard(completionTime) {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const currentDate = new Date().toISOString();
     
-    // Add to daily leaderboard
-    const existingDailyEntry = dailyLeaderboard.find(entry => entry.username === currentUser.username);
-    if (existingDailyEntry) {
-        if (completionTime < existingDailyEntry.completionTime) {
-            existingDailyEntry.completionTime = completionTime;
-            existingDailyEntry.date = currentDate;
+    try {
+        // Add to daily leaderboard
+        const dailyRef = db.collection('dailyLeaderboard');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const dailyQuery = await dailyRef
+            .where('username', '==', currentUser.username)
+            .where('date', '>=', today)
+            .get();
+
+        if (!dailyQuery.empty) {
+            const doc = dailyQuery.docs[0];
+            if (completionTime < doc.data().completionTime) {
+                await doc.ref.update({
+                    completionTime: completionTime,
+                    date: currentDate
+                });
+            }
+        } else {
+            await dailyRef.add({
+                username: currentUser.username,
+                completionTime: completionTime,
+                date: currentDate
+            });
         }
-    } else {
-        dailyLeaderboard.push({
-            username: currentUser.username,
-            completionTime: completionTime,
-            date: currentDate
-        });
-    }
-    
-    // Add to all-time leaderboard
-    const existingAllTimeEntry = allTimeLeaderboard.find(entry => 
-        entry.username === currentUser.username && 
-        entry.code === correctCode
-    );
-    
-    if (existingAllTimeEntry) {
-        if (completionTime < existingAllTimeEntry.completionTime) {
-            existingAllTimeEntry.completionTime = completionTime;
-            existingAllTimeEntry.date = currentDate;
+        
+        // Add to all-time leaderboard
+        const allTimeRef = db.collection('allTimeLeaderboard');
+        const allTimeQuery = await allTimeRef
+            .where('username', '==', currentUser.username)
+            .where('code', '==', correctCode)
+            .get();
+
+        if (!allTimeQuery.empty) {
+            const doc = allTimeQuery.docs[0];
+            if (completionTime < doc.data().completionTime) {
+                await doc.ref.update({
+                    completionTime: completionTime,
+                    date: currentDate
+                });
+            }
+        } else {
+            await allTimeRef.add({
+                username: currentUser.username,
+                completionTime: completionTime,
+                date: currentDate,
+                code: correctCode
+            });
         }
-    } else {
-        allTimeLeaderboard.push({
-            username: currentUser.username,
-            completionTime: completionTime,
-            date: currentDate,
-            code: correctCode
-        });
+        
+        // Update display
+        updateLeaderboard('daily');
+    } catch (error) {
+        console.error("Error adding to leaderboard:", error);
     }
-    
-    // Save both leaderboards
-    localStorage.setItem('dailyLeaderboard', JSON.stringify(dailyLeaderboard));
-    localStorage.setItem('allTimeLeaderboard', JSON.stringify(allTimeLeaderboard));
-    
-    // Update display
-    updateLeaderboard('daily');
 }
         
 function checkCode() {
@@ -584,43 +599,56 @@ function checkCode() {
         }
 
 // Update the leaderboard entry creation in updateLeaderboard function
-function updateLeaderboard(type = 'daily') {
+async function updateLeaderboard(type = 'daily') {
     const leaderboardElement = document.getElementById(`${type}Leaderboard`);
-    const leaderboardData = type === 'daily' ? dailyLeaderboard : allTimeLeaderboard;
+    const collectionRef = db.collection(type === 'daily' ? 'dailyLeaderboard' : 'allTimeLeaderboard');
     
-    const sortedLeaderboard = [...leaderboardData].sort((a, b) => a.completionTime - b.completionTime);
-    
-    leaderboardElement.innerHTML = '';
+    try {
+        let query = collectionRef;
+        if (type === 'daily') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            query = query.where('date', '>=', today);
+        }
+        
+        const snapshot = await query.orderBy('completionTime', 'asc').limit(100).get();
+        const entries = snapshot.docs.map(doc => doc.data());
+        
+        leaderboardElement.innerHTML = '';
 
-    sortedLeaderboard.forEach((entry, index) => {
-        const entryElement = document.createElement('div');
-        entryElement.className = 'leaderboard-entry';
+        entries.forEach((entry, index) => {
+            const entryElement = document.createElement('div');
+            entryElement.className = 'leaderboard-entry';
 
-        let medal = '';
-        if (index === 0) medal = '🥇';
-        else if (index === 1) medal = '🥈';
-        else if (index === 2) medal = '🥉';
+            let medal = '';
+            if (index === 0) medal = '🥇';
+            else if (index === 1) medal = '🥈';
+            else if (index === 2) medal = '🥉';
 
-        const minutes = Math.floor(entry.completionTime / 60000);
-        const seconds = ((entry.completionTime % 60000) / 1000).toFixed(1);
-        const timeString = `${minutes}m ${seconds}s`;
+            const minutes = Math.floor(entry.completionTime / 60000);
+            const seconds = ((entry.completionTime % 60000) / 1000).toFixed(1);
+            const timeString = `${minutes}m ${seconds}s`;
 
-        entryElement.innerHTML = `
-            <div class="rank">${medal || (index + 1)}</div>
-            <div class="username">${entry.username}</div>
-            <div class="completion-time">${timeString}</div>
-            ${type === 'allTime' ? `
-                <div class="date-completed">
-                    Code: "${entry.code}" on ${formatDate(entry.date)}
-                </div>
-            ` : ''}
-        `;
+            entryElement.innerHTML = `
+                <div class="rank">${medal || (index + 1)}</div>
+                <div class="username">${entry.username}</div>
+                <div class="completion-time">${timeString}</div>
+                ${type === 'allTime' ? `
+                    <div class="date-completed">
+                        Code: "${entry.code}" on ${formatDate(entry.date)}
+                    </div>
+                ` : ''}
+            `;
 
-        leaderboardElement.appendChild(entryElement);
-    });
+            leaderboardElement.appendChild(entryElement);
+        });
 
-    if (sortedLeaderboard.length === 0) {
-        leaderboardElement.innerHTML = '<p style="text-align: center">No completions yet!</p>';
+        if (entries.length === 0) {
+            leaderboardElement.innerHTML = '<p style="text-align: center">No completions yet!</p>';
+        }
+    } catch (error) {
+        console.error("Error updating leaderboard:", error);
+        leaderboardElement.innerHTML = '<p style="text-align: center">Error loading leaderboard</p>';
     }
 }
 
@@ -646,4 +674,25 @@ function updateLeaderboard(type = 'daily') {
         setInterval(updateRevealedLetters, 1000); // Check for new reveals every second
     </script>
 </body>
+    <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script>
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCxbW8MUxpUy5zkquJSQ5yU2hZ43wU-USs",
+  authDomain: "code-challenge-leaderboa-61eff.firebaseapp.com",
+  databaseURL: "https://code-challenge-leaderboa-61eff-default-rtdb.firebaseio.com",
+  projectId: "code-challenge-leaderboa-61eff",
+  storageBucket: "code-challenge-leaderboa-61eff.firebasestorage.app",
+  messagingSenderId: "310262673238",
+  appId: "1:310262673238:web:d469e985a44e127b86f0f7",
+  measurementId: "G-DKHP8F8ERZ"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
 </html>
