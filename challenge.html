@@ -578,20 +578,25 @@
             }
         }
 
-        async function updateLeaderboard(type = 'daily') {
-            const leaderboardElement = document.getElementById(`${type}Leaderboard`);
-            const collectionRef = db.collection(type === 'daily' ? 'dailyLeaderboard' : 'allTimeLeaderboard');
-            
-            try {
-                let query = collectionRef;
-                if (type === 'daily') {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    query = query.where('date', '>=', today);
-                }
-                
-                const snapshot = await query.orderBy('completionTime', 'asc').limit(100).get();
-                const entries = snapshot.docs.map(doc => doc.data());
+       async function updateLeaderboard(type = 'daily') {
+    const leaderboardElement = document.getElementById(`${type}Leaderboard`);
+    const collectionRef = db.collection(type === 'daily' ? 'dailyLeaderboard' : 'allTimeLeaderboard');
+    
+    try {
+        let query = collectionRef;
+        if (type === 'daily') {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            query = query
+                .where('date', '>=', today)
+                .orderBy('date')  // Add this line
+                .orderBy('completionTime', 'asc');
+        } else {
+            query = query.orderBy('completionTime', 'asc');
+        }
+        
+        const snapshot = await query.limit(100).get();
+        const entries = snapshot.docs.map(doc => doc.data());
                 
                 leaderboardElement.innerHTML = '';
 
@@ -622,14 +627,14 @@
                     leaderboardElement.appendChild(entryElement);
                 });
 
-                if (entries.length === 0) {
-                    leaderboardElement.innerHTML = '<p style="text-align: center">No completions yet!</p>';
-                }
-            } catch (error) {
-                console.error("Error updating leaderboard:", error);
-                leaderboardElement.innerHTML = '<p style="text-align: center">Error loading leaderboard</p>';
-            }
+           if (entries.length === 0) {
+            leaderboardElement.innerHTML = '<p style="text-align: center">No completions yet!</p>';
         }
+    } catch (error) {
+        console.error("Error updating leaderboard:", error);
+        leaderboardElement.innerHTML = '<p style="text-align: center">Error loading leaderboard</p>';
+    }
+}
 
         function formatDate(date) {
             const options = { month: 'short', day: 'numeric', year: 'numeric' };
