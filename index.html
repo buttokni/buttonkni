@@ -17,7 +17,7 @@
             color: white;
         }
 
-        .login-container {
+        .container {
             max-width: 400px;
             width: 100%;
             padding: 20px;
@@ -27,7 +27,7 @@
             margin-top: 50px;
         }
 
-        .login-form {
+        .form {
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -39,8 +39,15 @@
             gap: 5px;
         }
 
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         input[type="text"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="email"] {
             padding: 10px;
             font-size: 16px;
             background: transparent;
@@ -66,10 +73,29 @@
             transform: scale(1.05);
         }
 
-        .error-message {
-            color: #ff3333;
+        .message {
             text-align: center;
+            padding: 10px;
+            border-radius: 5px;
             display: none;
+        }
+
+        .error-message {
+            background-color: rgba(255, 51, 51, 0.2);
+            color: #ff3333;
+        }
+
+        .success-message {
+            background-color: rgba(51, 255, 51, 0.2);
+            color: #33ff33;
+        }
+
+        .toggle-form {
+            color: #0099ff;
+            text-decoration: underline;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 15px;
         }
 
         @keyframes rainbow {
@@ -94,58 +120,173 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
+    <div class="container" id="loginContainer">
         <h2 style="text-align: center;">Login to Code Challenge</h2>
-        <form class="login-form" onsubmit="return handleLogin(event)">
+        <form class="form" id="loginForm" onsubmit="return handleLogin(event)">
             <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" required>
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername" required>
             </div>
             <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required>
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="rememberMe">
+                <label for="rememberMe">Remember me</label>
             </div>
             <button type="submit">Login</button>
-            <p id="errorMessage" class="error-message">Invalid username or password</p>
+            <p id="loginMessage" class="message"></p>
         </form>
+        <p class="toggle-form" onclick="toggleForms()">Don't have an account? Register here</p>
+    </div>
+
+    <div class="container" id="registerContainer" style="display: none;">
+        <h2 style="text-align: center;">Register for Code Challenge</h2>
+        <form class="form" id="registerForm" onsubmit="return handleRegister(event)">
+            <div class="input-group">
+                <label for="registerUsername">Username</label>
+                <input type="text" id="registerUsername" required>
+            </div>
+            <div class="input-group">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" required>
+            </div>
+            <div class="input-group">
+                <label for="registerPassword">Password</label>
+                <input type="password" id="registerPassword" required minlength="8">
+            </div>
+            <div class="input-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <button type="submit">Register</button>
+            <p id="registerMessage" class="message"></p>
+        </form>
+        <p class="toggle-form" onclick="toggleForms()">Already have an account? Login here</p>
     </div>
 
     <script>
-        // Demo credentials (in a real app, these would be stored securely on a server)
-        const DEMO_USERS = [
-            { username: 'demo', password: 'password123' }
-        ];
+        // Initialize users array from localStorage or create empty array
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+
+        // Check for remembered user
+        window.onload = function() {
+            const rememberedUser = localStorage.getItem('rememberedUser');
+            if (rememberedUser) {
+                const user = JSON.parse(rememberedUser);
+                document.getElementById('loginUsername').value = user.username;
+                document.getElementById('rememberMe').checked = true;
+            }
+
+            // Check if already logged in
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                window.location.href = 'challenge.html';
+            }
+        }
+
+        function toggleForms() {
+            const loginContainer = document.getElementById('loginContainer');
+            const registerContainer = document.getElementById('registerContainer');
+            
+            if (loginContainer.style.display === 'none') {
+                loginContainer.style.display = 'block';
+                registerContainer.style.display = 'none';
+            } else {
+                loginContainer.style.display = 'none';
+                registerContainer.style.display = 'block';
+            }
+            
+            // Clear messages and forms
+            document.getElementById('loginMessage').style.display = 'none';
+            document.getElementById('registerMessage').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('registerForm').reset();
+        }
+
+        function showMessage(elementId, message, isError = true) {
+            const messageElement = document.getElementById(elementId);
+            messageElement.textContent = message;
+            messageElement.style.display = 'block';
+            messageElement.className = `message ${isError ? 'error-message' : 'success-message'}`;
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 3000);
+        }
 
         function handleLogin(event) {
             event.preventDefault();
             
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('errorMessage');
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
             
-            // Check credentials
-            const user = DEMO_USERS.find(u => u.username === username && u.password === password);
+            const user = users.find(u => u.username === username && u.password === password);
             
             if (user) {
-                // Store login state
+                if (rememberMe) {
+                    localStorage.setItem('rememberedUser', JSON.stringify({ username: username }));
+                } else {
+                    localStorage.removeItem('rememberedUser');
+                }
+                
                 localStorage.setItem('isLoggedIn', 'true');
-                // Redirect to main challenge page
+                localStorage.setItem('currentUser', JSON.stringify({
+                    username: user.username,
+                    email: user.email
+                }));
+                
                 window.location.href = 'challenge.html';
             } else {
-                errorMessage.style.display = 'block';
-                setTimeout(() => {
-                    errorMessage.style.display = 'none';
-                }, 3000);
+                showMessage('loginMessage', 'Invalid username or password');
             }
             
             return false;
         }
 
-        // Check if user is already logged in
-        window.onload = function() {
-            if (localStorage.getItem('isLoggedIn') === 'true') {
-                window.location.href = 'challenge.html';
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation
+            if (users.some(u => u.username === username)) {
+                showMessage('registerMessage', 'Username already exists');
+                return false;
             }
+            
+            if (password !== confirmPassword) {
+                showMessage('registerMessage', 'Passwords do not match');
+                return false;
+            }
+            
+            if (password.length < 8) {
+                showMessage('registerMessage', 'Password must be at least 8 characters long');
+                return false;
+            }
+            
+            // Add new user
+            users.push({
+                username,
+                email,
+                password
+            });
+            
+            // Save updated users array
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            showMessage('registerMessage', 'Registration successful! Please login.', false);
+            
+            // Clear form and switch to login after short delay
+            setTimeout(() => {
+                document.getElementById('registerForm').reset();
+                toggleForms();
+            }, 2000);
+            
+            return false;
         }
     </script>
 </body>
