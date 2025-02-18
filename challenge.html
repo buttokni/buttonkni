@@ -583,44 +583,46 @@ function checkCode() {
             return new Date(date).toLocaleDateString(undefined, options);
         }
 
-        function updateLeaderboard(type = 'daily') {
-            const leaderboardElement = document.getElementById(`${type}Leaderboard`);
-            const leaderboardData = type === 'daily' ? dailyLeaderboard : allTimeLeaderboard;
-            
-            // Sort leaderboard by completion time
-            const sortedLeaderboard = [...leaderboardData].sort((a, b) => a.completionTime - b.completionTime);
-            
-            leaderboardElement.innerHTML = '';
+// Update the leaderboard entry creation in updateLeaderboard function
+function updateLeaderboard(type = 'daily') {
+    const leaderboardElement = document.getElementById(`${type}Leaderboard`);
+    const leaderboardData = type === 'daily' ? dailyLeaderboard : allTimeLeaderboard;
+    
+    const sortedLeaderboard = [...leaderboardData].sort((a, b) => a.completionTime - b.completionTime);
+    
+    leaderboardElement.innerHTML = '';
 
-            sortedLeaderboard.forEach((entry, index) => {
-                const entryElement = document.createElement('div');
-                entryElement.className = 'leaderboard-entry';
+    sortedLeaderboard.forEach((entry, index) => {
+        const entryElement = document.createElement('div');
+        entryElement.className = 'leaderboard-entry';
 
-                // Determine medal emoji for top 3
-                let medal = '';
-                if (index === 0) medal = '🥇';
-                else if (index === 1) medal = '🥈';
-                else if (index === 2) medal = '🥉';
+        let medal = '';
+        if (index === 0) medal = '🥇';
+        else if (index === 1) medal = '🥈';
+        else if (index === 2) medal = '🥉';
 
-                // Format completion time
-                const minutes = Math.floor(entry.completionTime / 60000);
-                const seconds = ((entry.completionTime % 60000) / 1000).toFixed(1);
-                const timeString = `${minutes}m ${seconds}s`;
+        const minutes = Math.floor(entry.completionTime / 60000);
+        const seconds = ((entry.completionTime % 60000) / 1000).toFixed(1);
+        const timeString = `${minutes}m ${seconds}s`;
 
-                entryElement.innerHTML = `
-                    <div class="rank">${medal || (index + 1)}</div>
-                    <div class="username">${entry.username}</div>
-                    <div class="completion-time">${timeString}</div>
-                    ${type === 'allTime' ? `<div class="date-completed">Set on ${formatDate(entry.date)}</div>` : ''}
-                `;
+        entryElement.innerHTML = `
+            <div class="rank">${medal || (index + 1)}</div>
+            <div class="username">${entry.username}</div>
+            <div class="completion-time">${timeString}</div>
+            ${type === 'allTime' ? `
+                <div class="date-completed">
+                    Code: "${entry.code}" on ${formatDate(entry.date)}
+                </div>
+            ` : ''}
+        `;
 
-                leaderboardElement.appendChild(entryElement);
-            });
+        leaderboardElement.appendChild(entryElement);
+    });
 
-            if (sortedLeaderboard.length === 0) {
-                leaderboardElement.innerHTML = '<p style="text-align: center">No completions yet!</p>';
-            }
-        }
+    if (sortedLeaderboard.length === 0) {
+        leaderboardElement.innerHTML = '<p style="text-align: center">No completions yet!</p>';
+    }
+}
 
         // Close dropdowns when clicking outside
         window.addEventListener('click', function(event) {
