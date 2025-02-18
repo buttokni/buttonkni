@@ -451,6 +451,50 @@
             hintProgressDiv.appendChild(hintLine);
         }
 
+// Add this after your leaderboard initialization
+
+        
+
+        function toggleAccountMenu() {
+            const dropdown = document.getElementById('accountDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        function toggleLeaderboard() {
+            const modal = document.getElementById('leaderboardModal');
+            if (modal.style.display === 'block') {
+                modal.style.display = 'none';
+            } else {
+                updateLeaderboard('daily');
+                modal.style.display = 'block';
+            }
+        }
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show selected leaderboard
+            document.getElementById('dailyLeaderboard').style.display = tab === 'daily' ? 'block' : 'none';
+            document.getElementById('allTimeLeaderboard').style.display = tab === 'allTime' ? 'block' : 'none';
+
+            updateLeaderboard(tab);
+        }
+
+        function formatDate(date) {
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            return new Date(date).toLocaleDateString(undefined, options);
+        }
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -658,5 +702,26 @@ function checkCode() {
     document.getElementById('codeInput').value = '';
 }
 </script>
+        // Close dropdowns when clicking outside
+        window.addEventListener('click', function(event) {
+            const accountDropdown = document.getElementById('accountDropdown');
+            const accountButton = event.target.closest('.account-button');
+            const leaderboardModal = document.getElementById('leaderboardModal');
+            
+            if (!accountButton && accountDropdown.classList.contains('show')) {
+                accountDropdown.classList.remove('show');
+            }
+            
+            if (event.target === leaderboardModal) {
+                leaderboardModal.style.display = 'none';
+            }
+        });
+
+        // Initialize timers
+        updateRevealedLetters();
+        updateTimer(); // Call immediately
+        setInterval(updateTimer, 1000); // Update timer every second
+        setInterval(updateRevealedLetters, 1000); // Check for new reveals every second
+    </script>
 </body>
 </html>
