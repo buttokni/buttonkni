@@ -517,7 +517,8 @@
 
 async function addToLeaderboard(completionTime) {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    const currentDate = new Date().toISOString();
+    // Store date as timestamp instead of ISO string
+    const currentDate = firebase.firestore.Timestamp.now();
     
     try {
         // Add to daily leaderboard
@@ -527,7 +528,7 @@ async function addToLeaderboard(completionTime) {
         
         const dailyQuery = await dailyRef
             .where('username', '==', currentUser.username)
-            .where('date', '>=', today)
+            .where('date', '>=', firebase.firestore.Timestamp.fromDate(today))
             .get();
 
         if (!dailyQuery.empty) {
@@ -535,51 +536,51 @@ async function addToLeaderboard(completionTime) {
             if (completionTime < doc.data().completionTime) {
                 await doc.ref.update({
                     completionTime: completionTime,
-                    username: currentUser.username,  // Added to ensure consistency
+                    username: currentUser.username,
                     date: currentDate
                 });
             }
         } else {
             await dailyRef.add({
                 username: currentUser.username,
-                completionTime: completionTime,  // Make sure this is being set
+                completionTime: completionTime,
                 date: currentDate
             });
         }
-                
-                // Add to all-time leaderboard
-                const allTimeRef = db.collection('allTimeLeaderboard');
-                const allTimeQuery = await allTimeRef
-                    .where('username', '==', currentUser.username)
-                    .where('code', '==', correctCode)
-                    .get();
+        
+        // Add to all-time leaderboard
+        const allTimeRef = db.collection('allTimeLeaderboard');
+        const allTimeQuery = await allTimeRef
+            .where('username', '==', currentUser.username)
+            .where('code', '==', correctCode)
+            .get();
 
-                if (!allTimeQuery.empty) {
-                    const doc = allTimeQuery.docs[0];
-                    if (completionTime < doc.data().completionTime) {
-                        await doc.ref.update({
-                            completionTime: completionTime,
-                            date: currentDate
-                        });
-                    }
-                } else {
-                    await allTimeRef.add({
-                        username: currentUser.username,
-                        completionTime: completionTime,
-                        date: currentDate,
-                        code: correctCode
-                    });
-                }
-                
-                // Update display
-                updateLeaderboard('daily');
-                console.log("Successfully added to leaderboard");
+        if (!allTimeQuery.empty) {
+            const doc = allTimeQuery.docs[0];
+            if (completionTime < doc.data().completionTime) {
+                await doc.ref.update({
+                    completionTime: completionTime,
+                    date: currentDate
+                });
+            }
+        } else {
+            await allTimeRef.add({
+                username: currentUser.username,
+                completionTime: completionTime,
+                date: currentDate,
+                code: correctCode
+            });
+        }
+        
+        // Update display
+        updateLeaderboard('daily');
+        console.log("Successfully added to leaderboard");
     } catch (error) {
         console.error("Error adding to leaderboard:", error);
     }
 }
 
-  async function updateLeaderboard(type = 'daily') {
+async function updateLeaderboard(type = 'daily') {
     const leaderboardElement = document.getElementById(`${type}Leaderboard`);
     const collectionRef = db.collection(type === 'daily' ? 'dailyLeaderboard' : 'allTimeLeaderboard');
     
@@ -588,10 +589,11 @@ async function addToLeaderboard(completionTime) {
         if (type === 'daily') {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            console.log("Today's date for query:", today); // Debug log
+            const todayTimestamp = firebase.firestore.Timestamp.fromDate(today);
+            console.log("Today's timestamp for query:", todayTimestamp);
 
             query = query
-                .where('date', '>=', today)
+                .where('date', '>=', todayTimestamp)
                 .orderBy('date')
                 .orderBy('completionTime', 'asc');
         } else {
@@ -599,8 +601,8 @@ async function addToLeaderboard(completionTime) {
         }
         
         const snapshot = await query.limit(100).get();
+        console.log(`Raw ${type} data:`, snapshot.docs.map(doc => doc.data()));
         const entries = snapshot.docs.map(doc => doc.data());
-        console.log(`${type} entries:`, entries); // Debug log
         
         leaderboardElement.innerHTML = '';
 
@@ -623,7 +625,7 @@ async function addToLeaderboard(completionTime) {
                 <div class="completion-time">${timeString}</div>
                 ${type === 'allTime' ? `
                     <div class="date-completed">
-                        Code: "${entry.code}" on ${formatDate(entry.date)}
+                        Code: "${entry.code}" on ${formatDate(entry.date.toDate())}
                     </div>
                 ` : ''}
             `;
