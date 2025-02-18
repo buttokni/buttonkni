@@ -73,6 +73,71 @@
             100% { background-color: #ff0000; }
         }
 
+        .account-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .account-button {
+            background: transparent;
+            border: 2px solid #ff0000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            animation: rainbow 5s linear infinite;
+        }
+
+        .account-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 200px;
+            backdrop-filter: blur(10px);
+            display: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .account-dropdown.show {
+            display: block;
+        }
+
+        .account-info {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .account-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .logout-button {
+            width: 100%;
+            padding: 8px;
+            background-color: #ff3333;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: #ff4444;
+        }
+
         .error-popup, .success-popup {
             position: fixed;
             top: 20px;
@@ -124,3 +189,422 @@
 
         button:hover {
             transform: scale(1.05);
+        }
+
+        .hint-container {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .hint-progress {
+            font-family: monospace;
+            font-size: 24px;
+            letter-spacing: 8px;
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            color: white;
+        }
+
+        .hint-line {
+            width: 100%;
+            text-align: center;
+        }
+
+        .timer {
+            font-size: 14px;
+            color: #ffffff;
+            margin-top: 10px;
+        }
+
+        /* Leaderboard Styles */
+        .leaderboard-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .leaderboard-button {
+            background: transparent;
+            border: 2px solid #ff0000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            animation: rainbow 5s linear infinite;
+        }
+
+        .leaderboard-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1001;
+        }
+
+        .leaderboard-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #0a1929;
+            border: 3px solid;
+            animation: rainbow 5s linear infinite;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .leaderboard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+            border-radius: 20px;
+        }
+
+        .tab-button.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-entry {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 15px;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: center;
+        }
+
+        .date-completed {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            grid-column: 2 / -1;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <!-- Check login status -->
+    <script>
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <!-- Account Menu -->
+    <div class="account-menu">
+        <button class="account-button" onclick="toggleAccountMenu()">👤</button>
+        <div class="account-dropdown" id="accountDropdown">
+            <div class="account-info">
+                <p><strong>Username:</strong> <span id="menuUsername"></span></p>
+                <p><strong>Email:</strong> <span id="menuEmail"></span></p>
+            </div>
+            <button class="logout-button" onclick="handleLogout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="image-container">
+            <img src="https://lh7-us.googleusercontent.com/x5gqgqsNKMxxj1rK8e-fg_pp5t_WiM1sPZsE7eNcvZ_3hnebxZFKweji32Q2q5ntiBgbQ90hOqhKrdZLR7rWuakI9_hn_swBaaKwFvjWfPXIRZlqfl8hwB_aAdYfCQT1yF8FmkeejRFLbkJp5fTcfeUOTA2yuA" alt="Challenge Image">
+        </div>
+        
+        <div class="hint-progress" id="hintProgress"></div>
+
+        <div class="code-input">
+            <input type="text" id="codeInput" placeholder="..." maxlength="7">
+            <button onclick="checkCode()">submit</button>
+        </div>
+
+        <div class="error-popup" id="errorPopup">wrong</div>
+        <div class="success-popup" id="successPopup">Congratulations! You're cool.</div>
+
+        <div class="hint-container">
+            <h3>hint</h3>
+            <div class="timer" id="timer"></div>
+        </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-container">
+        <button class="leaderboard-button" onclick="toggleLeaderboard()">🏆</button>
+        <div class="leaderboard-modal" id="leaderboardModal">
+            <div class="leaderboard-content">
+                <div class="leaderboard-header">
+                    <h2>Leaderboard</h2>
+                    <button class="close-button" onclick="toggleLeaderboard()">×</button>
+                </div>
+                <div class="leaderboard-tabs">
+                    <button class="tab-button active" onclick="switchTab('daily')">Today's Records</button>
+                    <button class="tab-button" onclick="switchTab('allTime')">All-Time Best</button>
+                </div>
+                <div id="dailyLeaderboard" class="leaderboard-body">
+                    <!-- Daily records will be inserted here -->
+                </div>
+                <div id="allTimeLeaderboard" class="leaderboard-body" style="display: none;">
+                    <!-- All-time records will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const correctCode = 'dilated';
+        let startDate = new Date().toISOString();
+        localStorage.setItem('startDate', startDate);
+
+        // Initialize current user
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        document.getElementById('menuUsername').textContent = currentUser.username;
+        document.getElementById('menuEmail').textContent = currentUser.email;
+
+        // Initialize leaderboards
+        let dailyLeaderboard = JSON.parse(localStorage.getItem('dailyLeaderboard')) || [];
+        let allTimeLeaderboard = JSON.parse(localStorage.getItem('allTimeLeaderboard')) || [];
+
+        // Check if we need to reset daily leaderboard
+        const lastResetDate = localStorage.getItem('lastResetDate');
+        const today = new Date().toDateString();
+
+        if (lastResetDate !== today) {
+            dailyLeaderboard = [];
+            localStorage.setItem('dailyLeaderboard', JSON.stringify(dailyLeaderboard));
+            localStorage.setItem('lastResetDate', today);
+        }
+
+        function getMinutesPassed() {
+            const now = new Date();
+            const start = new Date(startDate);
+            return Math.floor((now - start) / (1000 * 60));
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const start = new Date(startDate);
+            const elapsed = now - start;
+            const nextInterval = Math.ceil(elapsed / (10 * 60 * 1000)) * (10 * 60 * 1000);
+            const remaining = nextInterval - elapsed;
+            
+            const minutes = Math.floor(remaining / (60 * 1000));
+            const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
+            
+            document.getElementById('timer').textContent = 
+                `${minutes}m ${seconds}s`;
+        }
+
+        function updateRevealedLetters() {
+            const minutesPassed = getMinutesPassed();
+            const letterToShow = Math.min(Math.floor(minutesPassed / 10), correctCode.length - 1);
+            
+            const hintProgressDiv = document.getElementById('hintProgress');
+            hintProgressDiv.innerHTML = ''; // Clear existing hint
+            
+            // Show single line with current progress
+            const hintLine = document.createElement('div');
+            hintLine.className = 'hint-line';
+            let line = '';
+            
+            // Build the line with revealed letters and dashes
+            for (let i = 0; i < correctCode.length; i++) {
+                if (i <= letterToShow) {
+                    line += correctCode[i].toUpperCase();
+                } else {
+                    line += '-';
+                }
+                if (i < correctCode.length - 1) {
+                    line += ' ';
+                }
+            }
+            
+            hintLine.textContent = line;
+            hintProgressDiv.appendChild(hintLine);
+        }
+
+        function checkCode() {
+            const input = document.getElementById('codeInput').value.toLowerCase();
+            const errorPopup = document.getElementById('errorPopup');
+            
+            if (input === correctCode) {
+                // Calculate completion time
+                const start = new Date(localStorage.getItem('startDate'));
+                const completionTime = new Date() - start;
+                
+                // Add to leaderboard
+                addToLeaderboard(completionTime);
+                
+                const successPopup = document.getElementById('successPopup');
+                const codeInput = document.getElementById('codeInput');
+                const submitButton = codeInput.nextElementSibling;
+                const image = document.querySelector('.image-container img');
+                
+                // Show success message
+                if (successPopup.style.display === 'block') {
+                    return;
+                }
+                
+                successPopup.style.display = 'block';
+                successPopup.style.animation = 'none';
+                successPopup.offsetHeight; // Trigger reflow
+                successPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
+                
+                // Hide input and button
+                codeInput.style.display = 'none';
+                submitButton.style.display = 'none';
+                
+                // Change image
+                image.src = 'https://lh7-us.googleusercontent.com/ZYWCJvyRjPnufQg6NApxIfVSGgt_Fo0WMOwWrOekR2pq5QjROu5LZUYxeb-OdAsxv_l4gJyiL3tUnaYAtdL00uichq7B-BHXmrdJP-bO8ZVJrEvAIe7MKI8XdIZvGt8SQhjZXofxP-IvSsek3P2GuaSOTAInKw';
+                
+                setTimeout(() => {
+                    successPopup.style.display = 'none';
+                }, 900);
+            } else {
+                // If animation is already running, don't start a new one
+                if (errorPopup.style.display === 'block') {
+                    return;
+                }
+                
+                errorPopup.style.display = 'block';
+                errorPopup.style.animation = 'none';
+                errorPopup.offsetHeight; // Trigger reflow
+                errorPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
+                
+                setTimeout(() => {
+                    errorPopup.style.display = 'none';
+                }, 900);
+            }
+            document.getElementById('codeInput').value = ''; // Clear input
+        }
+
+        function toggleAccountMenu() {
+            const dropdown = document.getElementById('accountDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        function toggleLeaderboard() {
+            const modal = document.getElementById('leaderboardModal');
+            if (modal.style.display === 'block') {
+                modal.style.display = 'none';
+            } else {
+                updateLeaderboard('daily');
+                modal.style.display = 'block';
+            }
+        }
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Show selected leaderboard
+            document.getElementById('dailyLeaderboard').style.display = tab === 'daily' ? 'block' : 'none';
+            document.getElementById('allTimeLeaderboard').style.display = tab === 'allTime' ? 'block' : 'none';
+
+            updateLeaderboard(tab);
+        }
+
+        function formatDate(date) {
+            const options = { month: 'short', day: 'numeric', year: 'numeric' };
+            return new Date(date).toLocaleDateString(undefined, options);
+        }
+
+        function updateLeaderboard(type = 'daily') {
+            const leaderboardElement = document.getElementById(`${type}Leaderboard`);
+            const leaderboardData = type === 'daily' ? dailyLeaderboard : allTimeLeaderboard;
+            
+            // Sort leaderboard by completion time
+            const sortedLeaderboard = [...leaderboardData].sort((a, b) => a.completionTime - b.completionTime);
+            
+            leaderboardElement.innerHTML = '';
+
+            sortedLeaderboard.forEach((entry, index) => {
+                const entryElement = document.createElement('div');
+                entryElement.className = 'leaderboard-entry';
+
+                // Determine medal emoji for top 3
+                let medal = '';
+                if (index === 0) medal = '🥇';
+                else if (index === 1) medal = '🥈';
+                else if (index === 2) medal = '🥉';
+
+                // Format completion time
+                const minutes = Math.floor(entry.completionTime / 60000);
+                const seconds = ((entry.completionTime % 60000) / 1000).toFixed(1);
+                const timeString = `${minutes}m ${seconds}s`;
+
+                entryElement.innerHTML = `
+                    <div class="rank">${medal || (index + 1)}</div>
+                    <div class="username">${entry.username}</div>
+                    <div class="completion-time">${timeString}</div>
+                    ${type === 'allTime' ? `<div class="date-completed">Set on ${formatDate(entry.date)}</div>` : ''}
+                `;
+
+                leaderboardElement.appendChild(entryElement);
+            });
+
+            if (sortedLeaderboard.length === 0) {
+                leaderboardElement.innerHTML = '<p style="text-align: center">No completions yet!</p>';
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        window.addEventListener('click', function(event) {
+            const accountDropdown = document.getElementById('accountDropdown');
+            const accountButton = event.target.closest('.account-button');
+            const leaderboardModal = document.getElementById('leaderboardModal');
+            
+            if (!accountButton && accountDropdown.classList.contains('show')) {
+                accountDropdown.classList.remove('show');
+            }
+            
+            if (event.target === leaderboardModal) {
+                leaderboardModal.style.display = 'none';
+            }
+        });
+
+        // Initialize timers
+        updateRevealedLetters();
+        updateTimer(); // Call immediately
+        setInterval(updateTimer, 1000); // Update timer every second
+        setInterval(updateRevealedLetters, 1000); // Check for new reveals every second
+    </script>
+</body>
+</html>
