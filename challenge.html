@@ -451,56 +451,48 @@
             hintProgressDiv.appendChild(hintLine);
         }
 
-       function checkCode() {
+function checkCode() {
     const input = document.getElementById('codeInput').value.toLowerCase();
+    console.log("Input:", input, "Correct code:", correctCode); // Debug log
     
     if (input === correctCode) {
-        // Calculate completion time
+        console.log("Correct code entered!"); // Debug log
         const start = new Date(localStorage.getItem('startDate'));
         const completionTime = new Date() - start;
         
         // Add to leaderboard
         addToLeaderboard(completionTime);
 
+        // Get popup elements
         const successPopup = document.getElementById('successPopup');
-        const codeInput = document.getElementById('codeInput');
-        const submitButton = document.querySelector('.code-input button');
-        const image = document.querySelector('.image-container img');
+        console.log("Success popup element:", successPopup); // Debug log
         
         // Show success message
         successPopup.style.display = 'block';
-        successPopup.style.animation = 'none';
-        successPopup.offsetHeight; // Trigger reflow
-        successPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
         
-        // Hide input and button
-        codeInput.style.display = 'none';
-        submitButton.style.display = 'none';
-        
-        // Change image
+        // Change the image
+        const image = document.querySelector('.image-container img');
         image.src = 'https://lh7-us.googleusercontent.com/ZYWCJvyRjPnufQg6NApxIfVSGgt_Fo0WMOwWrOekR2pq5QjROu5LZUYxeb-OdAsxv_l4gJyiL3tUnaYAtdL00uichq7B-BHXmrdJP-bO8ZVJrEvAIe7MKI8XdIZvGt8SQhjZXofxP-IvSsek3P2GuaSOTAInKw';
+        
+        // Hide input fields
+        document.getElementById('codeInput').style.display = 'none';
+        document.querySelector('.code-input button').style.display = 'none';
         
         setTimeout(() => {
             successPopup.style.display = 'none';
         }, 2000);
     } else {
+        console.log("Wrong code entered!"); // Debug log
         const errorPopup = document.getElementById('errorPopup');
-        
-        // If animation is already running, don't start a new one
-        if (errorPopup.style.display === 'block') {
-            return;
-        }
+        console.log("Error popup element:", errorPopup); // Debug log
         
         errorPopup.style.display = 'block';
-        errorPopup.style.animation = 'none';
-        errorPopup.offsetHeight; // Trigger reflow
-        errorPopup.style.animation = 'shake 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards';
         
         setTimeout(() => {
             errorPopup.style.display = 'none';
-        }, 900);
+        }, 2000);
     }
-    document.getElementById('codeInput').value = ''; // Clear input
+    document.getElementById('codeInput').value = '';
 }
 
         function toggleAccountMenu() {
