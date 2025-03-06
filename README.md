@@ -1,1 +1,1 @@
-stop snooping david
+the uncredited inspiration of bcc 3
